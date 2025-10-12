@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>BGTaskSchedulerPermittedIdentifiers</key>
+    <array>
+        <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    </array>
+
+    <key>CADisableMinimumFrameDurationOnPhone</key>
+    <true/>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>en</string>Ï
+    <key>CFBundleLocalizations</key>Ï
+    <array>
+        <string>en</string>
+    </array>
+
+    <key>CFBundleDisplayName</key>
+    <string>Benrimono Flutter Driver</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>benrimono_flutter_driver</string>
+    <key>CFBundlePackageType</key>
+    <string>APPL</string>
+    <key>CFBundleShortVersionString</key>
+    <string>$(FLUTTER_BUILD_NAME)</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleVersion</key>
+    <string>$(FLUTTER_BUILD_NUMBER)</string>
+
+    <key>FLTEnableImpeller</key>
+    <false/>
+    <key>FlutterDeepLinkingEnabled</key>
+    <true/>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+
+    <!-- 🔔 Notification Permission -->
+    <key>NSUserNotificationUsageDescription</key>
+    <string>通知機能を利用して、通話、メッセージ、注文、および配送状況について、常に最新の情報を提供します。</string>
+
+    <!-- 📷 Camera Permission -->
+    <key>NSCameraUsageDescription</key>
+    <string>カメラ機能を使用し、注文時の写真撮影やビデオ通話を行うことができます。</string>
+
+    <!-- 🖼️ Photos Permission -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>フォトライブラリを使用し、注文時に画像を選択してアップロードができます。</string>
+
+    <!-- 🎤 Microphone Permission -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>音声機能を使用し、音声通話やビデオ通話を行うことができます。</string>
+
+    <!-- 🧭 Location Permissions -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>地図の表示、配送状況のリアルタイム追跡のために、位置情報を使用します。</string>
+
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>配送状況のリアルタイム追跡のために、アプリを閉じていても位置情報を利用します。</string>
+
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>配送状況のリアルタイム追跡のために、バックグラウンド実行時に位置情報を利用します。</string>
+
+    <!-- ⚙️ Other Settings -->
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Music!</string>
+    <key>UIApplicationSupportsIndirectInputEvents</key>
+    <true/>
+
+    <!-- ⚙️ Background Modes -->
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+        <string>fetch</string>
+        <string>location</string>
+        <string>processing</string>
+        <string>remote-notification</string>
+        <string>voip</string>
+    </array>
+
+    <!-- 📱 UI Settings -->
+    <key>UILaunchStoryboardName</key>
+    <string>LaunchScreen</string>
+    <key>UIMainStoryboardFile</key>
+    <string>Main</string>
+    <key>UIStatusBarHidden</key>
+    <true/>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UISupportedInterfaceOrientations~ipad</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationPortraitUpsideDown</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UIViewControllerBasedStatusBarAppearance</key>
+    <false/>
+</dict>
+</plist>
