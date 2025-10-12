@@ -1,9 +1,7 @@
 name: zeb_permissions_helper
 description: A flexible, customizable permission helper for Flutter apps. Handles permission flows, platform special-cases (iOS notifications / location), and provides developer-friendly defaults.
-version: 0.1.0
+version: 1.0.0
 publish_to: 'https://pub.dev'
-homepage: https://example.com/your-package-homepage
-repository: https://github.com/yourusername/zeb_permissions_helper
 environment:
   sdk: ">=3.1.0 <4.0.0"
   flutter: ">=3.0.0"
