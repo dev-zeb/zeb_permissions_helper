@@ -1,4 +1,4 @@
-## 1.0.1 — Major UX & API Improvements for Permission Handling
+## 1.1.0 — Major UX & API Improvements for Permission Handling
 ### ✨ Enhancements
 - Refactored `ZebPermissionsHelperImpl` for a cleaner and more predictable permission flow.
 - Simplified setup — no need to install `permission_handler` manually.
