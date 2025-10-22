@@ -1,5 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:zeb_permissions_helper/zeb_permissions_helper.dart';
 
 void main() {
@@ -11,7 +10,7 @@ void main() {
     });
 
     test('custom configuration is applied correctly', () {
-      final customConfig = ZebPermissionsConfig(
+      const customConfig = ZebPermissionsConfig(
         showDialogsByDefault: false,
         defaultPackage: PermissionPackage.location,
       );
@@ -38,7 +37,7 @@ void main() {
 
     test('AppPermissionData copyWith works correctly', () {
       const original = AppPermissionData(
-        permission: Permission.camera,
+        permission: ZebPermission.camera,
         dialogText: DialogText(
           title: 'Title',
           explanation: 'Explanation',
@@ -50,32 +49,41 @@ void main() {
         supportedPackages: [PermissionPackage.permissionHandler],
       );
 
-      expect(copied.permission, Permission.camera);
+      expect(copied.permission, ZebPermission.camera);
       expect(copied.supportedPackages, [PermissionPackage.permissionHandler]);
     });
 
     test('PermissionRequestResult creation', () {
       const result = PermissionRequestResult(
         isGranted: true,
-        permission: Permission.camera,
+        permission: ZebPermission.camera,
         usedPackage: PermissionPackage.permissionHandler,
       );
 
       expect(result.isGranted, true);
-      expect(result.permission, Permission.camera);
+      expect(result.permission, ZebPermission.camera);
       expect(result.usedPackage, PermissionPackage.permissionHandler);
     });
 
     test('SequentialRequestConfig creation', () {
       const config = SequentialRequestConfig(
-        permissions: [Permission.camera, Permission.microphone],
+        permissions: [ZebPermission.camera, ZebPermission.microphone],
         showPurposeDialogs: true,
         delayBetweenRequests: Duration(milliseconds: 500),
       );
 
-      expect(config.permissions, [Permission.camera, Permission.microphone]);
+      expect(
+        config.permissions,
+        [
+          ZebPermission.camera,
+          ZebPermission.microphone,
+        ],
+      );
       expect(config.showPurposeDialogs, true);
-      expect(config.delayBetweenRequests, Duration(milliseconds: 500));
+      expect(
+        config.delayBetweenRequests,
+        const Duration(milliseconds: 500),
+      );
     });
 
     test('SingleRequestConfig creation', () {
@@ -99,7 +107,7 @@ void main() {
   group('Utils', () {
     test('getPackageForPermission with preferred package', () {
       final package = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         preferredPackage: PermissionPackage.location,
         defaultPackage: PermissionPackage.permissionHandler,
       );
@@ -109,9 +117,9 @@ void main() {
 
     test('getPackageForPermission with package overrides', () {
       final package = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         packageOverrides: {
-          Permission.location: PermissionPackage.location,
+          ZebPermission.location: PermissionPackage.location,
         },
         defaultPackage: PermissionPackage.permissionHandler,
       );
@@ -121,13 +129,11 @@ void main() {
 
     test('getPackageForPermission with default package', () {
       final package = getPackageForPermission(
-        Permission.camera,
+        ZebPermission.camera,
         defaultPackage: PermissionPackage.permissionHandler,
       );
 
       expect(package, PermissionPackage.permissionHandler);
     });
   });
-
-  // Add more test groups as needed
 }

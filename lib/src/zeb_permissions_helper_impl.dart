@@ -68,9 +68,15 @@ class ZebPermissionsHelper {
           context, dialogText.title, dialogText.explanation);
     }
 
-    // Request the permission
-    final isGranted =
-        await _requestPermissionWithPackage(context, permission, package);
+    bool isGranted = false;
+    if (context.mounted) {
+      // Request the permission
+      isGranted = await _requestPermissionWithPackage(
+        context,
+        permission,
+        package,
+      );
+    }
 
     return PermissionRequestResult(
       isGranted: isGranted,
@@ -106,9 +112,8 @@ class ZebPermissionsHelper {
 
   /// Check whether a permission is currently granted.
   Future<bool> isPermissionGranted(ZebPermission permission) async {
-    final perm = permission.toPermissionHandler;
-    final res = await resolvePermission(perm);
-    return res.isGranted;
+    final res = await resolveZebPermission(permission);
+    return res.toPermissionHandler.isGranted;
   }
 
   // ----------------------------------------------------------------------

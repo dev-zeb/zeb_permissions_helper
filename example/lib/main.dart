@@ -78,9 +78,9 @@ class _PermissionDemoScreenState extends State<PermissionDemoScreen> {
     final helper = ZebPermissionsHelper(
       config: ZebPermissionsConfig(
         overrides: {
-          ZebPermission.notification: AppPermissionData(
+          ZebPermission.notification: const AppPermissionData(
             permission: ZebPermission.notification,
-            dialogText: const DialogText(
+            dialogText: DialogText(
               title: "Custom Notification Access",
               explanation:
                   "Allow us to send you important order and chat updates.",

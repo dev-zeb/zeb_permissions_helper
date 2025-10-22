@@ -1,21 +1,20 @@
 import 'dart:io';
 
 import 'package:device_info_plus/device_info_plus.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:zeb_permissions_helper/zeb_permissions_helper.dart';
 
 /// Resolve permission types for platform-specific differences.
 ///
 /// Example: Android pre-API 33 doesn't expose a separate photos permission; map
 /// photos -> storage for those older SDKs.
-Future<Permission> resolvePermission(Permission original) async {
+Future<ZebPermission> resolveZebPermission(ZebPermission original) async {
   try {
-    if (original == Permission.photos && Platform.isAndroid) {
+    if (original == ZebPermission.photos && Platform.isAndroid) {
       final sdk = await _getAndroidSdkSafe();
       if (sdk != null && sdk < 33) {
-        return Permission.storage;
+        return ZebPermission.storage;
       }
-      return Permission.photos;
+      return ZebPermission.photos;
     }
   } catch (_) {
     // Fall through to return original if device info fails.
@@ -39,11 +38,11 @@ Future<int?> _getAndroidSdkSafe() async {
 /// 2. preferred package for this request
 /// 3. defaultPackage from the helper config
 PermissionPackage getPackageForPermission(
-    ZebPermission permission, {
-      PermissionPackage? preferredPackage,
-      required PermissionPackage defaultPackage,
-      Map<ZebPermission, PermissionPackage>? packageOverrides,
-    }) {
+  ZebPermission permission, {
+  PermissionPackage? preferredPackage,
+  required PermissionPackage defaultPackage,
+  Map<ZebPermission, PermissionPackage>? packageOverrides,
+}) {
   if (packageOverrides != null && packageOverrides.containsKey(permission)) {
     return packageOverrides[permission]!;
   }
