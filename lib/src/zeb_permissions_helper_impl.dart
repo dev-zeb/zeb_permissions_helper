@@ -1,220 +1,190 @@
 import 'dart:io';
-
-import 'package:device_info_plus/device_info_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:location/location.dart' as loc;
 import 'package:permission_handler/permission_handler.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import 'models.dart';
 import 'permission_strings.dart';
+import 'permission_abstraction.dart';
 import 'utils.dart';
 
+/// A helper class to simplify permission requests with optional
+/// purpose dialogs and permanent-denial handling.
 class ZebPermissionsHelper {
   final ZebPermissionsConfig config;
-  bool _isSequentialFlowRunning = false;
 
   ZebPermissionsHelper({this.config = const ZebPermissionsConfig()});
 
-  Map<Permission, AppPermissionData> get _permissionData {
+  Map<ZebPermission, AppPermissionData> get _permissionData {
     final merged =
-        Map<Permission, AppPermissionData>.from(defaultPermissionData);
-    if (config.overrides != null) {
-      merged.addAll(config.overrides!);
-    }
+        Map<ZebPermission, AppPermissionData>.from(defaultPermissionData);
+    if (config.overrides != null) merged.addAll(config.overrides!);
     return merged;
   }
 
-  // ---------- Public API ----------
-
-  /// Request a single permission with customizable options
+  /// Request a single permission.
   Future<PermissionRequestResult> requestPermission(
     BuildContext context,
-    Permission permission, {
+    ZebPermission permission, {
     SingleRequestConfig? requestConfig,
   }) async {
-    final resolved = await resolvePermission(permission);
-    final data = _permissionData[resolved] ?? _createFallbackData(resolved);
+    final data = _permissionData[permission] ?? _createFallbackData(permission);
+
     final package = getPackageForPermission(
-      resolved,
+      permission,
       preferredPackage: requestConfig?.package,
       defaultPackage: config.defaultPackage,
     );
 
-    // Show purpose dialog if requested and config allows
-    final shouldShowDialog =
-        requestConfig?.showPurposeDialog ?? config.showDialogsByDefault;
-
-    if (shouldShowDialog && context.mounted) {
-      final dialogText = requestConfig?.dialogText ?? data.dialogText;
-      await _showPurposeDialog(
-        context,
-        dialogText.title,
-        dialogText.explanation,
+    // Check status first
+    final permissionStatus = await _getPermissionStatus(permission, package);
+    if (permissionStatus.isGranted || permissionStatus.isLimited) {
+      return PermissionRequestResult(
+        isGranted: true,
+        permission: permission,
+        usedPackage: package,
       );
     }
 
-    // Request permission using the specified package
-    final isGranted = await _requestPermissionWithPackage(
-      context,
-      resolved,
-      package,
-      data,
-    );
+    // Handle permanent denial
+    if (permissionStatus.isPermanentlyDenied) {
+      if (context.mounted) {
+        await _showPermanentlyDeniedDialog(context, data);
+      }
+      return PermissionRequestResult(
+        isGranted: false,
+        permission: permission,
+        usedPackage: package,
+      );
+    }
+
+    // Show purpose dialog (if allowed)
+    final shouldShowDialog =
+        requestConfig?.showPurposeDialog ?? config.showDialogsByDefault;
+    if (shouldShowDialog && context.mounted) {
+      final dialogText = requestConfig?.dialogText ?? data.dialogText;
+      await _showPurposeDialog(
+          context, dialogText.title, dialogText.explanation);
+    }
+
+    bool isGranted = false;
+    if (context.mounted) {
+      // Request the permission
+      isGranted = await _requestPermissionWithPackage(
+        context,
+        permission,
+        package,
+      );
+    }
 
     return PermissionRequestResult(
       isGranted: isGranted,
-      permission: resolved,
+      permission: permission,
       usedPackage: package,
     );
   }
 
-  /// Request a list of permissions sequentially with full customization
+  /// Request multiple permissions sequentially.
   Future<List<PermissionRequestResult>> requestPermissionsSequentially(
     BuildContext context, {
     required SequentialRequestConfig sequentialConfig,
   }) async {
-    if (_isSequentialFlowRunning) {
-      return [];
-    }
-
-    _isSequentialFlowRunning = true;
     final results = <PermissionRequestResult>[];
 
-    for (final permission in sequentialConfig.permissions) {
+    for (final zebPermission in sequentialConfig.permissions) {
       await Future.delayed(sequentialConfig.delayBetweenRequests);
-
       if (!context.mounted) continue;
 
-      final resolved = await resolvePermission(permission);
-      final status = await resolved.status;
-
-      // Skip if already granted
-      if (status.isGranted || status.isLimited) {
-        results.add(PermissionRequestResult(
-          isGranted: true,
-          permission: resolved,
-          usedPackage: getPackageForPermission(
-            resolved,
-            packageOverrides: sequentialConfig.packageOverrides,
-            defaultPackage: config.defaultPackage,
-          ),
-        ));
-        continue;
-      }
-
-      final data = _permissionData[resolved] ?? _createFallbackData(resolved);
-      final flowRequired = await _checkIfFlowRequired(resolved, data);
-
-      if (flowRequired && context.mounted) {
-        final package = getPackageForPermission(
-          resolved,
-          packageOverrides: sequentialConfig.packageOverrides,
-          defaultPackage: config.defaultPackage,
-        );
-
-        final isGranted = await _requestPermissionFlow(
-          context,
-          data,
-          status,
-          package,
+      final result = await requestPermission(
+        context,
+        zebPermission,
+        requestConfig: SingleRequestConfig(
           showPurposeDialog: sequentialConfig.showPurposeDialogs,
-        );
-
-        results.add(PermissionRequestResult(
-          isGranted: isGranted,
-          permission: resolved,
-          usedPackage: package,
-        ));
-      }
-    }
-
-    _isSequentialFlowRunning = false;
-    return results;
-  }
-
-  /// Simple sequential flow with default configuration (backward compatibility)
-  Future<void> requestPermissionsSequentiallyWithUI(
-      BuildContext context) async {
-    final permissions =
-        _permissionData.values.map((e) => e.permission).toList();
-    await requestPermissionsSequentially(
-      context,
-      sequentialConfig: SequentialRequestConfig(
-        permissions: permissions,
-        showPurposeDialogs: config.showDialogsByDefault,
-      ),
-    );
-  }
-
-  /// Request multiple permissions at once (non-sequential)
-  Future<List<PermissionRequestResult>> requestMultiplePermissions(
-    BuildContext context,
-    List<Permission> permissions, {
-    Map<Permission, SingleRequestConfig>? requestConfigs,
-  }) async {
-    final results = <PermissionRequestResult>[];
-
-    for (final permission in permissions) {
-      final config = requestConfigs?[permission];
-      final result =
-          await requestPermission(context, permission, requestConfig: config);
+          package: sequentialConfig.packageOverrides?[zebPermission],
+        ),
+      );
       results.add(result);
     }
 
     return results;
   }
 
-  // ---------- Low-level helpers & checks ----------
-
-  Future<bool> isPermissionGranted(Permission permission) async {
-    final res = await resolvePermission(permission);
-    return res.isGranted;
+  /// Check whether a permission is currently granted.
+  Future<bool> isPermissionGranted(ZebPermission permission) async {
+    final res = await resolveZebPermission(permission);
+    return res.toPermissionHandler.isGranted;
   }
 
-  Future<PermissionStatus> getPermissionStatus(Permission permission) async {
-    final res = await resolvePermission(permission);
-    return res.status;
-  }
-
-  // ---------- Package-specific permission handlers ----------
+  // ----------------------------------------------------------------------
 
   Future<bool> _requestPermissionWithPackage(
     BuildContext context,
-    Permission permission,
+    ZebPermission permission,
     PermissionPackage package,
-    AppPermissionData data,
   ) async {
     switch (package) {
       case PermissionPackage.location:
         if (_isLocationPermission(permission)) {
-          return await _requestLocationWithPackage(permission);
+          return await _requestLocationPermission();
         }
         break;
       case PermissionPackage.notifications:
-        if (permission == Permission.notification) {
-          return await _requestNotificationWithPackage();
+        if (permission == ZebPermission.notification) {
+          return await _requestNotificationPermission();
         }
         break;
-      case PermissionPackage.permissionHandler:
-        // Fall back to permission_handler
+      default:
         break;
     }
 
     // Default to permission_handler
-    final status = await permission.request();
+    final perm = permission.toPermissionHandler;
+    final status = await perm.request();
     return status.isGranted || status.isLimited;
   }
 
-  Future<bool> _requestLocationWithPackage(Permission permission) async {
+  Future<PermissionStatus> _getPermissionStatus(
+    ZebPermission permission,
+    PermissionPackage package,
+  ) async {
+    switch (package) {
+      case PermissionPackage.location:
+        if (_isLocationPermission(permission)) {
+          final location = loc.Location();
+          final status = await location.hasPermission();
+          return _convertLocationStatus(status);
+        }
+        break;
+      case PermissionPackage.notifications:
+        if (permission == ZebPermission.notification) {
+          final plugin = FlutterLocalNotificationsPlugin();
+          if (Platform.isIOS) {
+            final res = await plugin
+                .resolvePlatformSpecificImplementation<
+                    IOSFlutterLocalNotificationsPlugin>()
+                ?.checkPermissions();
+            return (res?.isEnabled ?? false)
+                ? PermissionStatus.granted
+                : PermissionStatus.denied;
+          }
+          return await Permission.notification.status;
+        }
+        break;
+      default:
+        break;
+    }
+    return (await permission.toPermissionHandler.status);
+  }
+
+  Future<bool> _requestLocationPermission() async {
     final location = loc.Location();
     final status = await location.requestPermission();
     return status == loc.PermissionStatus.granted ||
         status == loc.PermissionStatus.grantedLimited;
   }
 
-  Future<bool> _requestNotificationWithPackage() async {
+  Future<bool> _requestNotificationPermission() async {
     if (Platform.isIOS) {
       final result = await FlutterLocalNotificationsPlugin()
           .resolvePlatformSpecificImplementation<
@@ -227,38 +197,19 @@ class ZebPermissionsHelper {
     }
   }
 
-  Future<bool> _checkLocationWithPackage() async {
-    final location = loc.Location();
-    final res = await location.hasPermission();
-    return res == loc.PermissionStatus.granted ||
-        res == loc.PermissionStatus.grantedLimited;
-  }
-
-  Future<bool> _checkNotificationWithPackage() async {
-    if (Platform.isIOS) {
-      final res = await FlutterLocalNotificationsPlugin()
-          .resolvePlatformSpecificImplementation<
-              IOSFlutterLocalNotificationsPlugin>()
-          ?.checkPermissions();
-      return res?.isEnabled ?? false;
-    } else {
-      return await Permission.notification.isGranted;
-    }
-  }
-
-  // ---------- Helpers & UI ----------
+  // ----------------------------------------------------------------------
 
   Future<void> _showPurposeDialog(
       BuildContext context, String title, String explanation) async {
     await showDialog<void>(
       context: context,
       barrierDismissible: false,
-      builder: (dialogContext) => AlertDialog(
+      builder: (ctx) => AlertDialog(
         title: Text(title),
         content: Text(explanation),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(dialogContext).pop(),
+            onPressed: () => Navigator.of(ctx).pop(),
             child: const Text("Next"),
           ),
         ],
@@ -266,160 +217,36 @@ class ZebPermissionsHelper {
     );
   }
 
-  Future<bool> _showRequiredPermissionDialog(
+  /// Default dialog for permanently denied permissions.
+  /// Developers can override this by providing custom UI in future versions.
+  Future<void> _showPermanentlyDeniedDialog(
     BuildContext context,
     AppPermissionData data,
   ) async {
-    return await showDialog<bool>(
-          context: context,
-          barrierDismissible: false,
-          builder: (dialogContext) => AlertDialog(
-            title: const Text("Attention"),
-            content: Text(data.dialogText.caution),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(dialogContext).pop(false);
-                },
-                child: const Text("OK"),
-              ),
-              TextButton(
-                onPressed: () async {
-                  Navigator.of(dialogContext).pop(true);
-                  await openAppSettings();
-                },
-                child: const Text("Open Settings"),
-              ),
-            ],
+    await showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Permission Required"),
+        content: Text(data.dialogText.caution),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text("Cancel"),
           ),
-        ) ??
-        false;
-  }
-
-  Future<int> getAndroidSdkVersion() async {
-    final androidInfo = await DeviceInfoPlugin().androidInfo;
-    return androidInfo.version.sdkInt;
-  }
-
-  // ---------- Internal flow pieces ----------
-
-  Future<bool> _checkIfFlowRequired(
-      Permission permission, AppPermissionData data) async {
-    // Platform specific
-    if (Platform.isIOS) {
-      if (permission == Permission.systemAlertWindow ||
-          permission == Permission.storage) {
-        return false;
-      }
-      if (_isLocationPermission(permission)) {
-        return !(await _checkLocationWithPackage());
-      }
-      if (permission == Permission.notification) {
-        return !(await _checkNotificationWithPackage());
-      }
-    }
-
-    if (Platform.isAndroid && permission == Permission.storage) {
-      final sdk = await getAndroidSdkVersion();
-      if (sdk >= 29) return false;
-    }
-
-    return true;
-  }
-
-  Future<bool> _requestPermissionFlow(
-    BuildContext context,
-    AppPermissionData data,
-    PermissionStatus status,
-    PermissionPackage package, {
-    required bool showPurposeDialog,
-  }) async {
-    // iOS special-case: location + notification never return permanentlyDenied in some cases
-    if (Platform.isIOS &&
-        (_isLocationPermission(data.permission) ||
-            data.permission == Permission.notification)) {
-      final key = "asked_${data.permission.value}";
-      final prefs = await SharedPreferences.getInstance();
-      final wasAskedBefore = prefs.getBool(key) ?? false;
-
-      if (status.isDenied) {
-        if (wasAskedBefore) {
-          final open = await _showRequiredPermissionDialog(context, data);
-          final newStatus =
-              await _getPermissionStatusWithPackage(data.permission, package);
-          return open &&
-              (newStatus == PermissionStatus.granted ||
-                  newStatus == PermissionStatus.limited);
-        } else {
-          // Show purpose
-          if (showPurposeDialog && context.mounted) {
-            await _showPurposeDialog(
-                context, data.dialogText.title, data.dialogText.explanation);
-          }
-
-          bool isGranted = false;
-          if (data.permission == Permission.notification) {
-            isGranted = await _requestNotificationWithPackage();
-          } else if (_isLocationPermission(data.permission)) {
-            isGranted = await _requestLocationWithPackage(data.permission);
-          } else {
-            isGranted = await data.permission.request().isGranted;
-          }
-
-          await prefs.setBool(key, true);
-          return isGranted;
-        }
-      }
-    }
-
-    // Normal path for Android + other iOS perms
-    if (status.isPermanentlyDenied && context.mounted) {
-      final open = await _showRequiredPermissionDialog(context, data);
-      final newStatus =
-          await _getPermissionStatusWithPackage(data.permission, package);
-      return open &&
-          (newStatus == PermissionStatus.granted ||
-              newStatus == PermissionStatus.limited);
-    }
-
-    // Show purpose then request
-    if (showPurposeDialog && context.mounted) {
-      await _showPurposeDialog(
-          context, data.dialogText.title, data.dialogText.explanation);
-    }
-
-    return await _requestPermissionWithPackage(
-      context,
-      data.permission,
-      package,
-      data,
+          TextButton(
+            onPressed: () async {
+              Navigator.of(ctx).pop();
+              await openAppSettings();
+            },
+            child: const Text("Open Settings"),
+          ),
+        ],
+      ),
     );
   }
 
-  Future<PermissionStatus> _getPermissionStatusWithPackage(
-    Permission permission,
-    PermissionPackage package,
-  ) async {
-    switch (package) {
-      case PermissionPackage.location:
-        if (_isLocationPermission(permission)) {
-          final location = loc.Location();
-          final status = await location.hasPermission();
-          return _convertLocationStatus(status);
-        }
-        break;
-      case PermissionPackage.notifications:
-        if (permission == Permission.notification) {
-          final isGranted = await _checkNotificationWithPackage();
-          return isGranted ? PermissionStatus.granted : PermissionStatus.denied;
-        }
-        break;
-      default:
-        break;
-    }
-
-    return permission.status;
-  }
+  // ----------------------------------------------------------------------
 
   PermissionStatus _convertLocationStatus(loc.PermissionStatus status) {
     switch (status) {
@@ -433,18 +260,18 @@ class ZebPermissionsHelper {
     }
   }
 
-  bool _isLocationPermission(Permission permission) {
-    return permission == Permission.location ||
-        permission == Permission.locationWhenInUse ||
-        permission == Permission.locationAlways;
+  bool _isLocationPermission(ZebPermission permission) {
+    return permission == ZebPermission.location ||
+        permission == ZebPermission.locationAlways ||
+        permission == ZebPermission.locationWhenInUse;
   }
 
-  AppPermissionData _createFallbackData(Permission permission) {
+  AppPermissionData _createFallbackData(ZebPermission permission) {
     return AppPermissionData(
       permission: permission,
       dialogText: const DialogText(
         title: "Permission Required",
-        explanation: "This app needs this permission to function properly.",
+        explanation: "This app requires permission to function properly.",
         caution: "Please enable this permission in Settings.",
       ),
     );

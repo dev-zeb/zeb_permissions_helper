@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:zeb_permissions_helper/zeb_permissions_helper.dart';
 
 // Mock classes
 class MockBuildContext extends Mock implements BuildContext {}
 
 class MockNavigatorObserver extends Mock implements NavigatorObserver {}
-
-class MockPermission extends Mock implements Permission {}
 
 void main() {
   late MockBuildContext mockContext;
@@ -40,22 +37,22 @@ void main() {
     test('PermissionRequestResult creation with mock data', () {
       const result = PermissionRequestResult(
         isGranted: true,
-        permission: Permission.camera,
+        permission: ZebPermission.camera,
         usedPackage: PermissionPackage.permissionHandler,
         error: 'Test error',
       );
 
       expect(result.isGranted, true);
-      expect(result.permission, Permission.camera);
+      expect(result.permission, ZebPermission.camera);
       expect(result.usedPackage, PermissionPackage.permissionHandler);
       expect(result.error, 'Test error');
     });
 
     test('SequentialRequestConfig with custom parameters', () {
-      final config = SequentialRequestConfig(
-        permissions: [Permission.camera, Permission.microphone],
+      const config = SequentialRequestConfig(
+        permissions: [ZebPermission.camera, ZebPermission.microphone],
         packageOverrides: {
-          Permission.location: PermissionPackage.location,
+          ZebPermission.location: PermissionPackage.location,
         },
         showPurposeDialogs: false,
         delayBetweenRequests: Duration(seconds: 1),
@@ -64,19 +61,19 @@ void main() {
       expect(config.permissions.length, 2);
       expect(config.packageOverrides?.length, 1);
       expect(config.showPurposeDialogs, false);
-      expect(config.delayBetweenRequests, Duration(seconds: 1));
+      expect(config.delayBetweenRequests, const Duration(seconds: 1));
     });
   });
 
   group('Configuration Tests', () {
     test('Custom configuration applies correctly', () {
       final customHelper = ZebPermissionsHelper(
-        config: ZebPermissionsConfig(
+        config: const ZebPermissionsConfig(
           showDialogsByDefault: false,
           defaultPackage: PermissionPackage.location,
           overrides: {
-            Permission.camera: const AppPermissionData(
-              permission: Permission.camera,
+            ZebPermission.camera: AppPermissionData(
+              permission: ZebPermission.camera,
               dialogText: DialogText(
                 title: 'Custom Camera Title',
                 explanation: 'Custom explanation',
@@ -89,8 +86,8 @@ void main() {
 
       expect(customHelper.config.showDialogsByDefault, false);
       expect(customHelper.config.defaultPackage, PermissionPackage.location);
-      expect(
-          customHelper.config.overrides?.containsKey(Permission.camera), true);
+      expect(customHelper.config.overrides?.containsKey(ZebPermission.camera),
+          true);
     });
 
     test('Default permission data contains expected permissions', () {
@@ -132,7 +129,7 @@ void main() {
 
     test('AppPermissionData equality and copyWith', () {
       const data1 = AppPermissionData(
-        permission: Permission.camera,
+        permission: ZebPermission.camera,
         dialogText: DialogText(
           title: 'Title',
           explanation: 'Explanation',
@@ -141,7 +138,7 @@ void main() {
       );
 
       const data2 = AppPermissionData(
-        permission: Permission.camera,
+        permission: ZebPermission.camera,
         dialogText: DialogText(
           title: 'Title',
           explanation: 'Explanation',
@@ -150,7 +147,7 @@ void main() {
       );
 
       const data3 = AppPermissionData(
-        permission: Permission.microphone,
+        permission: ZebPermission.microphone,
         dialogText: DialogText(
           title: 'Title',
           explanation: 'Explanation',
