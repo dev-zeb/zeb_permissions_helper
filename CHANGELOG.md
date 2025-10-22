@@ -1,4 +1,25 @@
-## 1.1.0 — Major UX & API Improvements for Permission Handling
+# 📜 Changelog
+
+All notable changes to **Zeb Permissions Helper** will be documented in this file.  
+This project follows [Semantic Versioning](https://semver.org/).
+
+---
+
+## [1.1.1] — Documentation & README Enhancements — 2025-10-22
+
+### 🧾 Updated
+- Improved **README.md** with better presentation and usability:
+  - Added **GitHub repository badge** and star encouragement section.
+  - Added **Contributing** section for community involvement.
+  - Reorganized feature tables for clarity and consistent alignment.
+  - Enhanced description and badges for better pub.dev visibility.
+- Refined code snippets and usage examples for clarity.
+- Minor grammar and typography improvements across documentation.
+
+---
+
+## [1.1.0] — Major UX & API Improvements for Permission Handling — 2025-10-20
+
 ### ✨ Enhancements
 - Refactored `ZebPermissionsHelperImpl` for a cleaner and more predictable permission flow.
 - Simplified setup — no need to install `permission_handler` manually.
@@ -25,5 +46,26 @@
   - Permission status management
   - Custom UI configuration examples
 
-## 1.0.0
-- Initial release.
+---
+
+## [1.0.0] — Initial Internal Prototype — 2025-10-15
+
+### 🧪 Internal
+- Created initial project structure following clean architecture.
+- Implemented foundational permission abstraction using `ZebPermission` enum.
+- Added test coverage for base permission logic and request flows.
+- Prepared base example app for internal validation.
+
+---
+
+## 📦 Upcoming
+
+### 🚧 Planned
+- Support for **web permissions** (camera, microphone).
+- In-app **permission dashboard widget** for user-facing control.
+- Integration tests for advanced multi-package permission scenarios.
+
+---
+
+*Developed with ❤️ by Sufi Aurangzeb Hossain*
+> “Great code is not about complexity — it’s about clarity.”
