@@ -3,11 +3,12 @@ name: Publish to pub.dev
 on:
   push:
     tags:
-      - 'v*.*.*'  # Only runs on new tags like v1.1.0
+      - 'v*.*.*'  # Runs when you push tags like v1.1.0
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -21,6 +22,6 @@ jobs:
         run: flutter pub get
 
       - name: Publish to pub.dev
-        run: dart pub publish
         env:
           PUB_TOKEN: ${{ secrets.PUB_CREDENTIALS }}
+        run: dart pub publish --force
