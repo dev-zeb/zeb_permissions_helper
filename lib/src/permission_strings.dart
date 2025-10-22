@@ -8,9 +8,9 @@ final Map<ZebPermission, AppPermissionData> defaultPermissionData = {
     dialogText: DialogText(
       title: "Notification Access",
       explanation:
-      "We use notifications to keep you updated about calls, messages, orders, and delivery progress.",
+          "We use notifications to keep you updated about calls, messages, orders, and delivery progress.",
       caution:
-      "Notifications are disabled. To receive updates about calls, messages and deliveries, enable Notifications in Settings.",
+          "Notifications are disabled. To receive updates about calls, messages and deliveries, enable Notifications in Settings.",
     ),
     supportedPackages: [
       PermissionPackage.permissionHandler,
@@ -22,9 +22,9 @@ final Map<ZebPermission, AppPermissionData> defaultPermissionData = {
     dialogText: DialogText(
       title: "Camera Access",
       explanation:
-      "We use your camera so you can capture photos for orders and during video calls.",
+          "We use your camera so you can capture photos for orders and during video calls.",
       caution:
-      "Camera access is disabled. To take photos or use video calls, enable Camera in Settings.",
+          "Camera access is disabled. To take photos or use video calls, enable Camera in Settings.",
     ),
   ),
   ZebPermission.photos: AppPermissionData(
@@ -44,9 +44,9 @@ final Map<ZebPermission, AppPermissionData> defaultPermissionData = {
     dialogText: DialogText(
       title: "Microphone Access",
       explanation:
-      "We use your microphone so you can talk during voice and video calls.",
+          "We use your microphone so you can talk during voice and video calls.",
       caution:
-      "Microphone access is disabled. Enable Microphone in Settings to use calls.",
+          "Microphone access is disabled. Enable Microphone in Settings to use calls.",
     ),
   ),
   ZebPermission.location: const AppPermissionData(
@@ -54,9 +54,9 @@ final Map<ZebPermission, AppPermissionData> defaultPermissionData = {
     dialogText: DialogText(
       title: "Location Access (While in Use)",
       explanation:
-      "We use your location to show maps, allow accurate address selections, and track your orders in real time while using the app.",
+          "We use your location to show maps, allow accurate address selections, and track your orders in real time while using the app.",
       caution:
-      "Location access is disabled. Enable Location (While Using the App) in Settings to use maps and delivery tracking.",
+          "Location access is disabled. Enable Location (While Using the App) in Settings to use maps and delivery tracking.",
     ),
     supportedPackages: [
       PermissionPackage.permissionHandler,
@@ -68,9 +68,9 @@ final Map<ZebPermission, AppPermissionData> defaultPermissionData = {
     dialogText: DialogText(
       title: "Location Access (While in Use)",
       explanation:
-      "We use your location to show maps, allow accurate address selections, and track your orders while using the app.",
+          "We use your location to show maps, allow accurate address selections, and track your orders while using the app.",
       caution:
-      "Location (While in Use) access is disabled. Enable it in Settings to use maps and delivery tracking.",
+          "Location (While in Use) access is disabled. Enable it in Settings to use maps and delivery tracking.",
     ),
     supportedPackages: [
       PermissionPackage.permissionHandler,
@@ -82,9 +82,9 @@ final Map<ZebPermission, AppPermissionData> defaultPermissionData = {
     dialogText: DialogText(
       title: "Location Access (Always)",
       explanation:
-      "We use your location to provide background tracking and persistent delivery updates when the app is not in the foreground.",
+          "We use your location to provide background tracking and persistent delivery updates when the app is not in the foreground.",
       caution:
-      "Background Location access is disabled. Enable Background Location in Settings to allow persistent tracking.",
+          "Background Location access is disabled. Enable Background Location in Settings to allow persistent tracking.",
     ),
     supportedPackages: [
       PermissionPackage.permissionHandler,
@@ -96,9 +96,9 @@ final Map<ZebPermission, AppPermissionData> defaultPermissionData = {
     dialogText: DialogText(
       title: "Storage Access",
       explanation:
-      "We use storage to save and access files like PDFs and images on your device.",
+          "We use storage to save and access files like PDFs and images on your device.",
       caution:
-      "Storage access is disabled. Enable Storage in Settings to save or open files.",
+          "Storage access is disabled. Enable Storage in Settings to save or open files.",
     ),
   ),
 };
