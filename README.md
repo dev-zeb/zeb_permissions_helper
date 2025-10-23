@@ -22,10 +22,8 @@ Here’s your corrected and formatting-safe version 👇
 
 If this package helps you, please consider:
 
-- ⭐ Star the repo on
-  GitHub: [zeb_permissions_helper](https://github.com/dev-zeb/zeb_permissions_helper)
-- 💙 Like the package on
-  pub.dev: [pub.dev/packages/zeb_permissions_helper](https://pub.dev/packages/zeb_permissions_helper)
+- ⭐ Star the repo on GitHub: [zeb_permissions_helper](https://github.com/dev-zeb/zeb_permissions_helper)
+- 💙 Like the package on pub.dev: [pub.dev/packages/zeb_permissions_helper](https://pub.dev/packages/zeb_permissions_helper)
 
 Your support motivates continued improvements and maintenance!
 
