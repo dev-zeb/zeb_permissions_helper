@@ -1,16 +1,13 @@
 # 📱 Zeb Permissions Example
 
-A showcase app demonstrating how to use the `zeb_permissions` package to handle various permission
-request flows in Flutter with clean, predictable, and customizable UI.
+A showcase app demonstrating how to use the `zeb_permissions` package to handle various permission request flows in Flutter with clean, predictable, and customizable UI.
 
 ---
 
 ## 🚀 Overview
 
-This example demonstrates real-world use cases of permission handling
-using `ZebPermissionsHelper`.  
-It includes different permission request patterns, customizable dialogs, and user experience flows
-for both Android and iOS.
+This example demonstrates real-world use cases of permission handling using `ZebPermissionsHelper`.  
+It includes different permission request patterns, customizable dialogs, and user experience flows for both Android and iOS.
 
 ---
 
@@ -53,7 +50,7 @@ example/
 ├── pubspec.yaml
 └── README.md                       # This file
 
-````
+```
 
 ---
 
@@ -65,7 +62,7 @@ Make sure you have Flutter installed and configured.
 cd example
 flutter pub get
 flutter run
-````
+```
 
 ---
 
@@ -91,11 +88,10 @@ You can override:
 Example:
 
 ```dart
-ZebPermissionsHelperImpl
-(
-showCustomDeniedDialog: (context, permission) {
-return MyCustomDeniedDialog(permission: permission);
-},
+ZebPermissionsHelperImpl (
+  showCustomDeniedDialog: (context, permission) {
+    return MyCustomDeniedDialog(permission: permission);
+  },
 );
 ```
 
