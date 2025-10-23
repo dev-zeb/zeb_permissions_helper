@@ -13,10 +13,8 @@
 
 If this package helps you, please consider:
 
-- ⭐ **Starring the repo on GitHub:
-  ** [zeb_permissions_helper](https://github.com/dev-zeb/zeb_permissions_helper)
-- 💙 **Liking the package on pub.dev:
-  ** [pub.dev/packages/zeb_permissions_helper](https://pub.dev/packages/zeb_permissions_helper)
+- ⭐ Star the repo on GitHub: [zeb_permissions_helper](https://github.com/dev-zeb/zeb_permissions_helper)
+- 💙 Like the package on pub.dev: [pub.dev/packages/zeb_permissions_helper](https://pub.dev/packages/zeb_permissions_helper)
 
 Your support motivates continued improvements and maintenance!
 
@@ -26,11 +24,11 @@ Your support motivates continued improvements and maintenance!
 
 **Zeb Permissions Helper** simplifies handling app permissions in Flutter with:
 
-* Unified API across packages (`permission_handler`, `location`, `flutter_local_notifications`)
-* Customizable dialogs and messages
-* Sequential permission requests
-* Configurable fallback and override behavior
-* Graceful handling of permanently denied permissions
+- Unified API across packages (`permission_handler`, `location`, `flutter_local_notifications`)
+- Customizable dialogs and messages
+- Sequential permission requests
+- Configurable fallback and override behavior
+- Graceful handling of permanently denied permissions
 
 ---
 
@@ -40,8 +38,8 @@ Add the dependency in your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  zeb_permissions_helper: ^1.1.1
-````
+  zeb_permissions_helper: ^1.1.2
+```
 
 Then run:
 
@@ -95,23 +93,18 @@ flutter pub get
 
 ### 1️⃣ Request a single permission
 
-```dart
-
+```
 final helper = ZebPermissionsHelper();
 
-final result = await
-helper.requestPermission
-(
-context,
-ZebPermission.camera,
+final result = await helper.requestPermission(
+  context,
+  ZebPermission.camera,
 );
 
-if
-(
-result.isGranted) {
-print("Camera permission granted!");
+if (result.isGranted) {
+  print("Camera permission granted!");
 } else {
-print("Camera permission denied or permanently denied.");
+  print("Camera permission denied or permanently denied.");
 }
 ```
 
@@ -119,23 +112,17 @@ print("Camera permission denied or permanently denied.");
 
 ### 2️⃣ Request with custom purpose dialog text
 
-```dart
-
-final result = await
-helper.requestPermission
-(
-context,
-ZebPermission.microphone,
-requestConfig: SingleRequestConfig(
-dialogText: const DialogText(
-title: "Microphone Access",
-explanation: "We need access so you can talk during calls.",
-caution: "Please enable the microphone in settings for calls."
-,
-)
-,
-)
-,
+```
+final result = await helper.requestPermission(
+  context,
+  ZebPermission.microphone,
+  requestConfig: SingleRequestConfig(
+    dialogText: const DialogText(
+      title: "Microphone Access",
+      explanation: "We need access so you can talk during calls.",
+      caution: "Please enable the microphone in settings for calls.",
+    ),
+  ),
 );
 ```
 
@@ -143,24 +130,21 @@ caution: "Please enable the microphone in settings for calls."
 
 ### 3️⃣ Request multiple permissions sequentially
 
-```dart
-
-final results = await
-helper.requestPermissionsSequentially
-(
-context,
-sequentialConfig: SequentialRequestConfig(
-permissions: [
-ZebPermission.camera,
-ZebPermission.microphone,
-ZebPermission.locationWhenInUse,
-],
-delayBetweenRequests: const Duration(milliseconds: 500),
-),
+```
+final results = await helper.requestPermissionsSequentially(
+  context,
+  sequentialConfig: SequentialRequestConfig(
+    permissions: [
+      ZebPermission.camera,
+      ZebPermission.microphone,
+      ZebPermission.locationWhenInUse,
+    ],
+    delayBetweenRequests: const Duration(milliseconds: 500),
+  ),
 );
 
 for (final res in results) {
-debugPrint("${res.permission} → Granted: ${res.isGranted}");
+  debugPrint("${res.permission} → Granted: ${res.isGranted}");
 }
 ```
 
@@ -168,8 +152,7 @@ debugPrint("${res.permission} → Granted: ${res.isGranted}");
 
 ### 4️⃣ Customize default texts and behaviors
 
-```dart
-
+```
 final config = ZebPermissionsConfig(
   showDialogsByDefault: true,
   defaultPackage: PermissionPackage.permissionHandler,
@@ -179,9 +162,9 @@ final config = ZebPermissionsConfig(
       dialogText: const DialogText(
         title: "Allow Notifications",
         explanation:
-        "Stay up to date with real-time order and chat alerts.",
+            "Stay up to date with real-time order and chat alerts.",
         caution:
-        "Notifications are disabled. Please enable them in Settings.",
+            "Notifications are disabled. Please enable them in Settings.",
       ),
     ),
   },
@@ -194,14 +177,12 @@ final helper = ZebPermissionsHelper(config: config);
 
 ### 5️⃣ Check if a permission is already granted
 
-```dart
+```
+final isGranted =
+    await helper.isPermissionGranted(ZebPermission.locationAlways);
 
-final isGranted = await
-helper.isPermissionGranted
-(
-ZebPermission.locationAlways);
 if (isGranted) {
-print("Location Always permission already granted!");
+  print("Location Always permission already granted!");
 }
 ```
 
@@ -211,8 +192,7 @@ print("Location Always permission already granted!");
 
 You can fully override the default “Open Settings” dialog by providing a custom builder:
 
-```dart
-
+```
 final helper = ZebPermissionsHelper(
   config: ZebPermissionsConfig(
     permanentlyDeniedDialogBuilder: (context, data, onOpenSettings) {
@@ -244,7 +224,8 @@ final helper = ZebPermissionsHelper(
 
 ## 🧪 Example Project
 
-You can check a working example in the [`example/`](example) directory.
+You can check a working example in
+the [`example/`](https://github.com/dev-zeb/zeb_permissions_helper/tree/main/example) directory.
 It demonstrates requesting multiple permissions with custom dialogs and configurations.
 
 ---
@@ -275,3 +256,4 @@ Developed with ❤️ by **Sufi Aurangzeb Hossain**
 
 > Simplifying permission handling for every Flutter app.
 > “Great code is not about complexity — it’s about clarity.”
+
