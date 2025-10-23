@@ -1,11 +1,3 @@
-Ah, I see what’s happening 👀 — the **code formatting and indentation** in your README are breaking on **pub.dev / GitHub** because of **unnecessary line breaks, indentation loss, and unmatched backticks** (extra or missing ```` fences).
-
-Let’s fix it **completely** and make your README look professional and render perfectly on both **pub.dev** and **GitHub** — preserving syntax highlighting, code block integrity, and Markdown tables.
-
-Here’s your corrected and formatting-safe version 👇
-
----
-
 ````markdown
 # 🛡️ Zeb Permissions Helper
 
