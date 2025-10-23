@@ -1,52 +1,53 @@
 import 'dart:io';
-import 'package:permission_handler/permission_handler.dart';
+
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:zeb_permissions_helper/zeb_permissions_helper.dart';
 
-Future<Permission> resolvePermission(Permission original) async {
-  if (original == Permission.photos && Platform.isAndroid) {
-    // For Android pre-33, use storage
-    final sdk = await _getAndroidSdkSafe();
-    if (sdk != null && sdk < 33) return Permission.storage;
-    return Permission.photos;
+/// Resolve permission types for platform-specific differences.
+///
+/// Example: Android pre-API 33 doesn't expose a separate photos permission; map
+/// photos -> storage for those older SDKs.
+Future<ZebPermission> resolveZebPermission(ZebPermission original) async {
+  try {
+    if (original == ZebPermission.photos && Platform.isAndroid) {
+      final sdk = await _getAndroidSdkSafe();
+      if (sdk != null && sdk < 33) {
+        return ZebPermission.storage;
+      }
+      return ZebPermission.photos;
+    }
+  } catch (_) {
+    // Fall through to return original if device info fails.
   }
   return original;
 }
 
-// helper that doesn't throw if DeviceInfo plugin not available
+/// Safely retrieve Android SDK version. Returns null when unavailable.
 Future<int?> _getAndroidSdkSafe() async {
   try {
-    final deviceInfo = await importDeviceInfo();
+    final deviceInfo = DeviceInfoPlugin();
     final androidInfo = await deviceInfo.androidInfo;
     return androidInfo.version.sdkInt;
-  } catch (e) {
+  } catch (_) {
     return null;
   }
 }
 
-// helper to lazily import DeviceInfoPlugin to avoid circular imports
-Future<dynamic> importDeviceInfo() async {
-  // This would be implemented to return the actual DeviceInfoPlugin
-  // For now, we'll keep it as a placeholder
-  return await Future.value(null);
-}
-
-/// Get the appropriate package for a permission
+/// Decide which package to use for a permission:
+/// 1. packageOverrides (per-sequence/per-request)
+/// 2. preferred package for this request
+/// 3. defaultPackage from the helper config
 PermissionPackage getPackageForPermission(
-  Permission permission, {
+  ZebPermission permission, {
   PermissionPackage? preferredPackage,
   required PermissionPackage defaultPackage,
-  Map<Permission, PermissionPackage>? packageOverrides,
+  Map<ZebPermission, PermissionPackage>? packageOverrides,
 }) {
-  // Check for overrides first
   if (packageOverrides != null && packageOverrides.containsKey(permission)) {
     return packageOverrides[permission]!;
   }
 
-  // Use preferred package if provided
-  if (preferredPackage != null) {
-    return preferredPackage;
-  }
+  if (preferredPackage != null) return preferredPackage;
 
-  // Use default package for the permission type
   return defaultPackage;
 }

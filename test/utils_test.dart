@@ -1,37 +1,35 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:permission_handler/permission_handler.dart';
-import 'package:zeb_permissions_helper/src/utils.dart';
 import 'package:zeb_permissions_helper/zeb_permissions_helper.dart';
 
 void main() {
-  group('Permission Resolution', () {
+  group('ZebPermission Resolution', () {
     test('resolvePermission returns same permission for non-photos permission',
         () async {
-      final permission = await resolvePermission(Permission.camera);
-      expect(permission, Permission.camera);
+      final permission = await resolveZebPermission(ZebPermission.camera);
+      expect(permission, ZebPermission.camera);
     });
 
     test('resolvePermission returns same permission for microphone', () async {
-      final permission = await resolvePermission(Permission.microphone);
-      expect(permission, Permission.microphone);
+      final permission = await resolveZebPermission(ZebPermission.microphone);
+      expect(permission, ZebPermission.microphone);
     });
 
     test('resolvePermission returns same permission for location', () async {
-      final permission = await resolvePermission(Permission.location);
-      expect(permission, Permission.location);
+      final permission = await resolveZebPermission(ZebPermission.location);
+      expect(permission, ZebPermission.location);
     });
 
     test('resolvePermission returns same permission for notification',
         () async {
-      final permission = await resolvePermission(Permission.notification);
-      expect(permission, Permission.notification);
+      final permission = await resolveZebPermission(ZebPermission.notification);
+      expect(permission, ZebPermission.notification);
     });
   });
 
   group('Package Selection', () {
     test('getPackageForPermission returns preferred package when provided', () {
       final package = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         preferredPackage: PermissionPackage.location,
         defaultPackage: PermissionPackage.permissionHandler,
       );
@@ -40,9 +38,9 @@ void main() {
 
     test('getPackageForPermission returns override package when provided', () {
       final package = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         packageOverrides: {
-          Permission.location: PermissionPackage.location,
+          ZebPermission.location: PermissionPackage.location,
         },
         defaultPackage: PermissionPackage.permissionHandler,
       );
@@ -52,7 +50,7 @@ void main() {
     test('getPackageForPermission returns default package when no preferences',
         () {
       final package = getPackageForPermission(
-        Permission.camera,
+        ZebPermission.camera,
         defaultPackage: PermissionPackage.permissionHandler,
       );
       expect(package, PermissionPackage.permissionHandler);
@@ -61,10 +59,10 @@ void main() {
     test('getPackageForPermission prioritizes override over preferred package',
         () {
       final package = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         preferredPackage: PermissionPackage.notifications, // Wrong package
         packageOverrides: {
-          Permission.location: PermissionPackage.location,
+          ZebPermission.location: PermissionPackage.location,
         },
         defaultPackage: PermissionPackage.permissionHandler,
       );
@@ -73,7 +71,7 @@ void main() {
 
     test('getPackageForPermission handles null overrides gracefully', () {
       final package = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         preferredPackage: PermissionPackage.location,
         packageOverrides: null,
         defaultPackage: PermissionPackage.permissionHandler,
@@ -83,7 +81,7 @@ void main() {
 
     test('getPackageForPermission handles empty overrides gracefully', () {
       final package = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         preferredPackage: null,
         packageOverrides: {},
         defaultPackage: PermissionPackage.permissionHandler,
@@ -95,17 +93,17 @@ void main() {
   group('Edge Cases', () {
     test('getPackageForPermission with multiple permission types', () {
       final locationPackage = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         defaultPackage: PermissionPackage.permissionHandler,
       );
 
       final notificationPackage = getPackageForPermission(
-        Permission.notification,
+        ZebPermission.notification,
         defaultPackage: PermissionPackage.permissionHandler,
       );
 
       final cameraPackage = getPackageForPermission(
-        Permission.camera,
+        ZebPermission.camera,
         defaultPackage: PermissionPackage.permissionHandler,
       );
 
@@ -116,12 +114,12 @@ void main() {
 
     test('getPackageForPermission with different default packages', () {
       final package1 = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         defaultPackage: PermissionPackage.location,
       );
 
       final package2 = getPackageForPermission(
-        Permission.location,
+        ZebPermission.location,
         defaultPackage: PermissionPackage.notifications,
       );
 
