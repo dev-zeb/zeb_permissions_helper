@@ -3,7 +3,7 @@ name: Publish to pub.dev
 on:
   push:
     tags:
-      - 'v*.*.*'  # Runs when you push tags like v1.1.0
+      - 'v*.*.*' # Trigger when version tags like v1.1.2 are pushed
 
 jobs:
   publish:
@@ -21,7 +21,16 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Publish to pub.dev
+      - name: Restore pub credentials
         env:
           PUB_TOKEN: ${{ secrets.PUB_CREDENTIALS }}
-        run: dart pub publish --force
+        run: |
+          mkdir -p ~/.pub-cache
+          echo "$PUB_TOKEN" > ~/.pub-cache/credentials.json
+
+      - name: Publish (dry-run) to pub.dev
+        run: dart pub publish --dry-run
+
+      - name: Publish to pub.dev
+        if: startsWith(github.ref, 'refs/tags/v') && github.event_name == 'push'
+        run: dart pub publish --force # Use --force to skip confirmation
