@@ -90,12 +90,11 @@ You can override:
 
 Example:
 
-```dart
-ZebPermissionsHelperImpl
-(
-showCustomDeniedDialog: (context, permission) {
-return MyCustomDeniedDialog(permission: permission);
-},
+```
+ZebPermissionsHelperImpl (
+  showCustomDeniedDialog: (context, permission) {
+    return MyCustomDeniedDialog(permission: permission);
+  },
 );
 ```
 
